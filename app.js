@@ -983,6 +983,552 @@ function(t) {
         c(n)
     }
 }(Zepto),
+function(t) {
+    function e(e, n, i) {
+        var r = t.Event(n);
+        return t(e).trigger(r, i),
+        !r.isDefaultPrevented()
+    }
+    function n(t, n, i, r) {
+        return t.global ? e(n || y, i, r) : void 0
+    }
+    function i(e) {
+        e.global && 0 === t.active++ && n(e, null, "ajaxStart")
+    }
+    function r(e) {
+        e.global && !--t.active && n(e, null, "ajaxStop")
+    }
+    function o(t, e) {
+        var i = e.context;
+        return e.beforeSend.call(i, t, e) === !1 || n(e, i, "ajaxBeforeSend", [t, e]) === !1 ? !1 : void n(e, i, "ajaxSend", [t, e])
+    }
+    function a(t, e, i, r) {
+        var o = i.context
+          , a = "success";
+        i.success.call(o, t, a, e),
+        r && r.resolveWith(o, [t, a, e]),
+        n(i, o, "ajaxSuccess", [e, i, t]),
+        u(a, e, i)
+    }
+    function s(t, e, i, r, o) {
+        var a = r.context;
+        r.error.call(a, i, e, t),
+        o && o.rejectWith(a, [i, e, t]),
+        n(r, a, "ajaxError", [i, r, t || e]),
+        u(e, i, r)
+    }
+    function u(t, e, i) {
+        var o = i.context;
+        i.complete.call(o, e, t),
+        n(i, o, "ajaxComplete", [e, i]),
+        r(i)
+    }
+    function c() {}
+    function l(t) {
+        return t && (t = t.split(";", 2)[0]),
+        t && (t == T ? "html" : t == E ? "json" : w.test(t) ? "script" : b.test(t) && "xml") || "text"
+    }
+    function f(t, e) {
+        return "" == e ? t : (t + "&" + e).replace(/[&?]{1,2}/, "?")
+    }
+    function h(e) {
+        e.processData && e.data && "string" != t.type(e.data) && (e.data = t.param(e.data, e.traditional)),
+        !e.data || e.type && "GET" != e.type.toUpperCase() || (e.url = f(e.url, e.data),
+        e.data = void 0)
+    }
+    function p(e, n, i, r) {
+        return t.isFunction(n) && (r = i,
+        i = n,
+        n = void 0),
+        t.isFunction(i) || (r = i,
+        i = void 0),
+        {
+            url: e,
+            data: n,
+            success: i,
+            dataType: r
+        }
+    }
+    function d(e, n, i, r) {
+        var o, a = t.isArray(n), s = t.isPlainObject(n);
+        t.each(n, function(n, u) {
+            o = t.type(u),
+            r && (n = i ? r : r + "[" + (s || "object" == o || "array" == o ? n : "") + "]"),
+            !r && a ? e.add(u.name, u.value) : "array" == o || !i && "object" == o ? d(e, u, i, n) : e.add(n, u)
+        })
+    }
+    var m, v, g = 0, y = window.document, x = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, w = /^(?:text|application)\/javascript/i, b = /^(?:text|application)\/xml/i, E = "application/json", T = "text/html", $ = /^\s*$/, C = y.createElement("a");
+    C.href = window.location.href,
+    t.active = 0,
+    t.ajaxJSONP = function(e, n) {
+        if (!("type"in e))
+            return t.ajax(e);
+        var i, r, u = e.jsonpCallback, c = (t.isFunction(u) ? u() : u) || "jsonp" + ++g, l = y.createElement("script"), f = window[c], h = function(e) {
+            t(l).triggerHandler("error", e || "abort")
+        }, p = {
+            abort: h
+        };
+        return n && n.promise(p),
+        t(l).on("load error", function(o, u) {
+            clearTimeout(r),
+            t(l).off().remove(),
+            "error" != o.type && i ? a(i[0], p, e, n) : s(null, u || "error", p, e, n),
+            window[c] = f,
+            i && t.isFunction(f) && f(i[0]),
+            f = i = void 0
+        }),
+        o(p, e) === !1 ? (h("abort"),
+        p) : (window[c] = function() {
+            i = arguments
+        }
+        ,
+        l.src = e.url.replace(/\?(.+)=\?/, "?$1=" + c),
+        y.head.appendChild(l),
+        e.timeout > 0 && (r = setTimeout(function() {
+            h("timeout")
+        }, e.timeout)),
+        p)
+    }
+    ,
+    t.ajaxSettings = {
+        type: "GET",
+        beforeSend: c,
+        success: c,
+        error: c,
+        complete: c,
+        context: null,
+        global: !0,
+        xhr: function() {
+            return new window.XMLHttpRequest
+        },
+        accepts: {
+            script: "text/javascript, application/javascript, application/x-javascript",
+            json: E,
+            xml: "application/xml, text/xml",
+            html: T,
+            text: "text/plain"
+        },
+        crossDomain: !1,
+        timeout: 0,
+        processData: !0,
+        cache: !0
+    },
+    t.ajax = function(e) {
+        var n, r = t.extend({}, e || {}), u = t.Deferred && t.Deferred();
+        for (m in t.ajaxSettings)
+            void 0 === r[m] && (r[m] = t.ajaxSettings[m]);
+        i(r),
+        r.crossDomain || (n = y.createElement("a"),
+        n.href = r.url,
+        n.href = n.href,
+        r.crossDomain = C.protocol + "//" + C.host != n.protocol + "//" + n.host),
+        r.url || (r.url = window.location.toString()),
+        h(r);
+        var p = r.dataType
+          , d = /\?.+=\?/.test(r.url);
+        if (d && (p = "jsonp"),
+        r.cache !== !1 && (e && e.cache === !0 || "script" != p && "jsonp" != p) || (r.url = f(r.url, "_=" + Date.now())),
+        "jsonp" == p)
+            return d || (r.url = f(r.url, r.jsonp ? r.jsonp + "=?" : r.jsonp === !1 ? "" : "callback=?")),
+            t.ajaxJSONP(r, u);
+        var g, x = r.accepts[p], w = {}, b = function(t, e) {
+            w[t.toLowerCase()] = [t, e]
+        }, E = /^([\w-]+:)\/\//.test(r.url) ? RegExp.$1 : window.location.protocol, T = r.xhr(), j = T.setRequestHeader;
+        if (u && u.promise(T),
+        r.crossDomain || b("X-Requested-With", "XMLHttpRequest"),
+        b("Accept", x || "*/*"),
+        (x = r.mimeType || x) && (x.indexOf(",") > -1 && (x = x.split(",", 2)[0]),
+        T.overrideMimeType && T.overrideMimeType(x)),
+        (r.contentType || r.contentType !== !1 && r.data && "GET" != r.type.toUpperCase()) && b("Content-Type", r.contentType || "application/x-www-form-urlencoded"),
+        r.headers)
+            for (v in r.headers)
+                b(v, r.headers[v]);
+        if (T.setRequestHeader = b,
+        T.onreadystatechange = function() {
+            if (4 == T.readyState) {
+                T.onreadystatechange = c,
+                clearTimeout(g);
+                var e, n = !1;
+                if (T.status >= 200 && T.status < 300 || 304 == T.status || 0 == T.status && "file:" == E) {
+                    p = p || l(r.mimeType || T.getResponseHeader("content-type")),
+                    e = T.responseText;
+                    try {
+                        "script" == p ? (1,
+                        eval)(e) : "xml" == p ? e = T.responseXML : "json" == p && (e = $.test(e) ? null : t.parseJSON(e))
+                    } catch (i) {
+                        n = i
+                    }
+                    n ? s(n, "parsererror", T, r, u) : a(e, T, r, u)
+                } else
+                    s(T.statusText || null, T.status ? "error" : "abort", T, r, u)
+            }
+        }
+        ,
+        o(T, r) === !1)
+            return T.abort(),
+            s(null, "abort", T, r, u),
+            T;
+        if (r.xhrFields)
+            for (v in r.xhrFields)
+                T[v] = r.xhrFields[v];
+        var S = "async"in r ? r.async : !0;
+        T.open(r.type, r.url, S, r.username, r.password);
+        for (v in w)
+            j.apply(T, w[v]);
+        return r.timeout > 0 && (g = setTimeout(function() {
+            T.onreadystatechange = c,
+            T.abort(),
+            s(null, "timeout", T, r, u)
+        }, r.timeout)),
+        T.send(r.data ? r.data : null),
+        T
+    }
+    ,
+    t.get = function() {
+        return t.ajax(p.apply(null, arguments))
+    }
+    ,
+    t.post = function() {
+        var e = p.apply(null, arguments);
+        return e.type = "POST",
+        t.ajax(e)
+    }
+    ,
+    t.getJSON = function() {
+        var e = p.apply(null, arguments);
+        return e.dataType = "json",
+        t.ajax(e)
+    }
+    ,
+    t.fn.load = function(e, n, i) {
+        if (!this.length)
+            return this;
+        var r, o = this, a = e.split(/\s/), s = p(e, n, i), u = s.success;
+        return a.length > 1 && (s.url = a[0],
+        r = a[1]),
+        s.success = function(e) {
+            o.html(r ? t("<div>").html(e.replace(x, "")).find(r) : e),
+            u && u.apply(o, arguments)
+        }
+        ,
+        t.ajax(s),
+        this
+    }
+    ;
+    var j = encodeURIComponent;
+    t.param = function(e, n) {
+        var i = [];
+        return i.add = function(e, n) {
+            t.isFunction(n) && (n = n()),
+            null == n && (n = ""),
+            this.push(j(e) + "=" + j(n))
+        }
+        ,
+        d(i, e, n),
+        i.join("&").replace(/%20/g, "+")
+    }
+}(Zepto),
+function(t) {
+    t.fn.serializeArray = function() {
+        var e, n, i = [], r = function(t) {
+            return t.forEach ? t.forEach(r) : void i.push({
+                name: e,
+                value: t
+            })
+        };
+        return this[0] && t.each(this[0].elements, function(i, o) {
+            n = o.type,
+            e = o.name,
+            e && "fieldset" != o.nodeName.toLowerCase() && !o.disabled && "submit" != n && "reset" != n && "button" != n && "file" != n && ("radio" != n && "checkbox" != n || o.checked) && r(t(o).val())
+        }),
+        i
+    }
+    ,
+    t.fn.serialize = function() {
+        var t = [];
+        return this.serializeArray().forEach(function(e) {
+            t.push(encodeURIComponent(e.name) + "=" + encodeURIComponent(e.value))
+        }),
+        t.join("&")
+    }
+    ,
+    t.fn.submit = function(e) {
+        if (0 in arguments)
+            this.bind("submit", e);
+        else if (this.length) {
+            var n = t.Event("submit");
+            this.eq(0).trigger(n),
+            n.isDefaultPrevented() || this.get(0).submit()
+        }
+        return this
+    }
+}(Zepto),
+function(t) {
+    "__proto__"in {} || t.extend(t.zepto, {
+        Z: function(e, n) {
+            return e = e || [],
+            t.extend(e, t.fn),
+            e.selector = n || "",
+            e.__Z = !0,
+            e
+        },
+        isZ: function(e) {
+            return "array" === t.type(e) && "__Z"in e
+        }
+    });
+    try {
+        getComputedStyle(void 0)
+    } catch (e) {
+        var n = getComputedStyle;
+        window.getComputedStyle = function(t) {
+            try {
+                return n(t)
+            } catch (e) {
+                return null
+            }
+        }
+    }
+}(Zepto),
+function(t, e) {
+    function n(t) {
+        return t.replace(/([a-z])([A-Z])/, "$1-$2").toLowerCase()
+    }
+    function i(t) {
+        return r ? r + t : t.toLowerCase()
+    }
+    var r, o, a, s, u, c, l, f, h, p, d = "", m = {
+        Webkit: "webkit",
+        Moz: "",
+        O: "o"
+    }, v = document.createElement("div"), g = /^((translate|rotate|scale)(X|Y|Z|3d)?|matrix(3d)?|perspective|skew(X|Y)?)$/i, y = {};
+    t.each(m, function(t, n) {
+        return v.style[t + "TransitionProperty"] !== e ? (d = "-" + t.toLowerCase() + "-",
+        r = n,
+        !1) : void 0
+    }),
+    o = d + "transform",
+    y[a = d + "transition-property"] = y[s = d + "transition-duration"] = y[c = d + "transition-delay"] = y[u = d + "transition-timing-function"] = y[l = d + "animation-name"] = y[f = d + "animation-duration"] = y[p = d + "animation-delay"] = y[h = d + "animation-timing-function"] = "",
+    t.fx = {
+        off: r === e && v.style.transitionProperty === e,
+        speeds: {
+            _default: 400,
+            fast: 200,
+            slow: 600
+        },
+        cssPrefix: d,
+        transitionEnd: i("TransitionEnd"),
+        animationEnd: i("AnimationEnd")
+    },
+    t.fn.animate = function(n, i, r, o, a) {
+        return t.isFunction(i) && (o = i,
+        r = e,
+        i = e),
+        t.isFunction(r) && (o = r,
+        r = e),
+        t.isPlainObject(i) && (r = i.easing,
+        o = i.complete,
+        a = i.delay,
+        i = i.duration),
+        i && (i = ("number" == typeof i ? i : t.fx.speeds[i] || t.fx.speeds._default) / 1e3),
+        a && (a = parseFloat(a) / 1e3),
+        this.anim(n, i, r, o, a)
+    }
+    ,
+    t.fn.anim = function(i, r, d, m, v) {
+        var x, w, b, E = {}, T = "", $ = this, C = t.fx.transitionEnd, j = !1;
+        if (r === e && (r = t.fx.speeds._default / 1e3),
+        v === e && (v = 0),
+        t.fx.off && (r = 0),
+        "string" == typeof i)
+            E[l] = i,
+            E[f] = r + "s",
+            E[p] = v + "s",
+            E[h] = d || "linear",
+            C = t.fx.animationEnd;
+        else {
+            w = [];
+            for (x in i)
+                g.test(x) ? T += x + "(" + i[x] + ") " : (E[x] = i[x],
+                w.push(n(x)));
+            T && (E[o] = T,
+            w.push(o)),
+            r > 0 && "object" == typeof i && (E[a] = w.join(", "),
+            E[s] = r + "s",
+            E[c] = v + "s",
+            E[u] = d || "linear")
+        }
+        return b = function(e) {
+            if ("undefined" != typeof e) {
+                if (e.target !== e.currentTarget)
+                    return;
+                t(e.target).unbind(C, b)
+            } else
+                t(this).unbind(C, b);
+            j = !0,
+            t(this).css(y),
+            m && m.call(this)
+        }
+        ,
+        r > 0 && (this.bind(C, b),
+        setTimeout(function() {
+            j || b.call($)
+        }, 1e3 * (r + v) + 25)),
+        this.size() && this.get(0).clientLeft,
+        this.css(E),
+        0 >= r && setTimeout(function() {
+            $.each(function() {
+                b.call(this)
+            })
+        }, 0),
+        this
+    }
+    ,
+    v = null
+}(Zepto),
+function(t, e) {
+    function n(n, i, r, o, a) {
+        "function" != typeof i || a || (a = i,
+        i = e);
+        var s = {
+            opacity: r
+        };
+        return o && (s.scale = o,
+        n.css(t.fx.cssPrefix + "transform-origin", "0 0")),
+        n.animate(s, i, null, a)
+    }
+    function i(e, i, r, o) {
+        return n(e, i, 0, r, function() {
+            a.call(t(this)),
+            o && o.call(this)
+        })
+    }
+    var r = window.document
+      , o = (r.documentElement,
+    t.fn.show)
+      , a = t.fn.hide
+      , s = t.fn.toggle;
+    t.fn.show = function(t, i) {
+        return o.call(this),
+        t === e ? t = 0 : this.css("opacity", 0),
+        n(this, t, 1, "1,1", i)
+    }
+    ,
+    t.fn.hide = function(t, n) {
+        return t === e ? a.call(this) : i(this, t, "0,0", n)
+    }
+    ,
+    t.fn.toggle = function(n, i) {
+        return n === e || "boolean" == typeof n ? s.call(this, n) : this.each(function() {
+            var e = t(this);
+            e["none" == e.css("display") ? "show" : "hide"](n, i)
+        })
+    }
+    ,
+    t.fn.fadeTo = function(t, e, i) {
+        return n(this, t, e, null, i)
+    }
+    ,
+    t.fn.fadeIn = function(t, e) {
+        var n = this.css("opacity");
+        return n > 0 ? this.css("opacity", 0) : n = 1,
+        o.call(this).fadeTo(t, n, e)
+    }
+    ,
+    t.fn.fadeOut = function(t, e) {
+        return i(this, t, null, e)
+    }
+    ,
+    t.fn.fadeToggle = function(e, n) {
+        return this.each(function() {
+            var i = t(this);
+            i[0 == i.css("opacity") || "none" == i.css("display") ? "fadeIn" : "fadeOut"](e, n)
+        })
+    }
+}(Zepto),
+function(t) {
+    function e(t, e, n, i) {
+        return Math.abs(t - e) >= Math.abs(n - i) ? t - e > 0 ? "Left" : "Right" : n - i > 0 ? "Up" : "Down"
+    }
+    function n() {
+        l = null,
+        h.last && (h.el.trigger("longTap"),
+        h = {})
+    }
+    function i() {
+        l && clearTimeout(l),
+        l = null
+    }
+    function r() {
+        s && clearTimeout(s),
+        u && clearTimeout(u),
+        c && clearTimeout(c),
+        l && clearTimeout(l),
+        s = u = c = l = null,
+        h = {}
+    }
+    function o(t) {
+        return ("touch" == t.pointerType || t.pointerType == t.MSPOINTER_TYPE_TOUCH) && t.isPrimary
+    }
+    function a(t, e) {
+        return t.type == "pointer" + e || t.type.toLowerCase() == "mspointer" + e
+    }
+    var s, u, c, l, f, h = {}, p = 750;
+    t(document).ready(function() {
+        var d, m, v, g, y = 0, x = 0;
+        "MSGesture"in window && (f = new MSGesture,
+        f.target = document.body),
+        t(document).bind("MSGestureEnd", function(t) {
+            var e = t.velocityX > 1 ? "Right" : t.velocityX < -1 ? "Left" : t.velocityY > 1 ? "Down" : t.velocityY < -1 ? "Up" : null;
+            e && (h.el.trigger("swipe"),
+            h.el.trigger("swipe" + e))
+        }).on("touchstart MSPointerDown pointerdown", function(e) {
+            (!(g = a(e, "down")) || o(e)) && (v = g ? e : e.touches[0],
+            e.touches && 1 === e.touches.length && h.x2 && (h.x2 = void 0,
+            h.y2 = void 0),
+            d = Date.now(),
+            m = d - (h.last || d),
+            h.el = t("tagName"in v.target ? v.target : v.target.parentNode),
+            s && clearTimeout(s),
+            h.x1 = v.pageX,
+            h.y1 = v.pageY,
+            m > 0 && 250 >= m && (h.isDoubleTap = !0),
+            h.last = d,
+            l = setTimeout(n, p),
+            f && g && f.addPointer(e.pointerId))
+        }).on("touchmove MSPointerMove pointermove", function(t) {
+            (!(g = a(t, "move")) || o(t)) && (v = g ? t : t.touches[0],
+            i(),
+            h.x2 = v.pageX,
+            h.y2 = v.pageY,
+            y += Math.abs(h.x1 - h.x2),
+            x += Math.abs(h.y1 - h.y2))
+        }).on("touchend MSPointerUp pointerup", function(n) {
+            (!(g = a(n, "up")) || o(n)) && (i(),
+            h.x2 && Math.abs(h.x1 - h.x2) > 30 || h.y2 && Math.abs(h.y1 - h.y2) > 30 ? c = setTimeout(function() {
+                h.el.trigger("swipe"),
+                h.el.trigger("swipe" + e(h.x1, h.x2, h.y1, h.y2)),
+                h = {}
+            }, 0) : "last"in h && (30 > y && 30 > x ? u = setTimeout(function() {
+                var e = t.Event("tap");
+                e.cancelTouch = r,
+                h.el.trigger(e),
+                h.isDoubleTap ? (h.el && h.el.trigger("doubleTap"),
+                h = {}) : s = setTimeout(function() {
+                    s = null,
+                    h.el && h.el.trigger("singleTap"),
+                    h = {}
+                }, 250)
+            }, 0) : h = {}),
+            y = x = 0)
+        }).on("touchcancel MSPointerCancel pointercancel", r),
+        t(window).on("scroll", r)
+    }),
+    ["swipe", "swipeLeft", "swipeRight", "swipeUp", "swipeDown", "doubleTap", "tap", "singleTap", "longTap"].forEach(function(e) {
+        t.fn[e] = function(t) {
+            return this.on(e, t)
+        }
+    })
+}(Zepto),
 $(function() {
     function t() {
         $(".move-item").not(".move-out").each(function(t) {
@@ -1072,7 +1618,19 @@ $(function() {
             $('#slide').hide();
         }
     }),
-    
+    $(".move-item").swipeDown(function() {
+        return h ? !1 : ($(this).prev().css({
+            "-webkit-transform": "rotateZ(0deg) translate3d(0, 0, 0)"
+        }),
+        $(this).prev().removeClass("move-out"),
+        $("body").removeClass("blue"),
+        $("header").removeClass("hide"),
+        $("#send-card").hasClass("anti") && setTimeout(function() {
+            $("#send-card").removeClass("anti")
+        }, 500),
+        e(),
+        void t())
+    }),
     $("#go-home").on("click", function() {
         return h ? !1 : ($(".move-out").each(function() {
             $(this).css({
