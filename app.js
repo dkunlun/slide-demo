@@ -1605,7 +1605,7 @@ $(function() {
                 "-webkit-transform": "translate3d(" + -u / c * r + "px, " + -r + "px, 0)"
             }),
             $(this).addClass("move-out"),
-            p == $(this).index() + 2 && $("body").addClass("blue") && console.log(1),
+            p == $(this).index() + 2 && $("body").addClass("blue"),
             e(),
             t(),
             "undefined" != typeof mixpanel && "undefined" != typeof article_id && mixpanel.track("card" + $(".move-out").length, {
@@ -1619,6 +1619,7 @@ $(function() {
         }
     }),
     $(".move-item").swipeDown(function() {
+        $(this).index() == 1 && $('#slide').show();
         return h ? !1 : ($(this).prev().css({
             "-webkit-transform": "rotateZ(0deg) translate3d(0, 0, 0)"
         }),
